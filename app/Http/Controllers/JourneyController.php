@@ -175,6 +175,10 @@ class JourneyController extends Controller
         $data = $response->json();
 
         if ($data['status'] !== 'OK') {
+            \Log::error('Directions API error', [
+                'status' => $data['status'] ?? 'unknown',
+                'error_message' => $data['error_message'] ?? 'none',
+            ]);
             return null;
         }
 
