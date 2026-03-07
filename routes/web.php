@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\AiController;
+use App\Http\Controllers\DogController;
+use App\Http\Controllers\JourneyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,6 +34,15 @@ Route::middleware('auth')->group(function () {
     // AI相談
     Route::post('/ai/ask', [AiController::class, 'ask'])->name('ai.ask');
 
+    // おかげ犬
+    Route::get('/dogs/create', [DogController::class, 'create'])->name('dogs.create');
+    Route::post('/dogs', [DogController::class, 'store'])->name('dogs.store');
+    Route::get('/journey/departure', [JourneyController::class, 'departure'])->name('journey.departure');
+    Route::post('/journey/start', [JourneyController::class, 'start'])->name('journey.start');
+    Route::get('/journey/{journey}', [JourneyController::class, 'show'])->name('journey.show');
+    Route::get('/journey/{journey}/story', [JourneyController::class, 'story'])->name('journey.story');
+    Route::post('/journey/{journey}/generate-story', [JourneyController::class, 'generateStory'])->name('journey.generate-story');
+    Route::get('/journey/{journey}/share', [JourneyController::class, 'share'])->name('journey.share');
 });
 
 // ⬇️ ⚠️ /posts/create と衝突するため /posts/{post} は middleware グループの後に書く

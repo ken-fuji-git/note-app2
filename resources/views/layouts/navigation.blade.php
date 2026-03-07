@@ -20,6 +20,10 @@
                         class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('posts.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
                         ノート
                     </a>
+                    <a href="{{ route('dogs.create') }}"
+                        class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('dogs.*') || request()->routeIs('journey.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
+                        おかげ犬
+                    </a>
                 </div>
             </div>
 
@@ -77,6 +81,10 @@
             <a href="{{ route('posts.index') }}"
                 class="block px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('posts.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700' }}">
                 ノート
+            </a>
+            <a href="{{ route('dogs.create') }}"
+                class="block px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('dogs.*') || request()->routeIs('journey.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700' }}">
+                おかげ犬
             </a>
         </div>
 
