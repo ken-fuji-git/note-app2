@@ -12,15 +12,17 @@
 
     <div class="py-8">
         <div class="max-w-lg mx-auto px-4">
-            {{-- 地図+進行バー（スクロール時に上部固定） --}}
-            <div class="sticky top-0 z-30 bg-slate-50 pb-2 -mx-4 px-4">
-                @if($journey->route_polyline)
-                <div class="rounded-xl overflow-hidden shadow-sm mb-2">
-                    <div id="route-map" class="w-full h-40"></div>
-                </div>
-                @endif
+            {{-- 地図 --}}
+            @if($journey->route_polyline)
+            <div class="card mb-4 overflow-hidden">
+                <div id="route-map" class="w-full h-48"></div>
+            </div>
+            @endif
+
+            {{-- 旅の進行バー --}}
+            <div class="mb-6">
                 <div class="flex justify-between text-xs text-slate-400 mb-1">
-                    <span class="truncate max-w-[45%]">{{ $journey->departure_name }}</span>
+                    <span>{{ $journey->departure_name }}</span>
                     <span>伊勢神宮</span>
                 </div>
                 <div class="w-full bg-slate-200 rounded-full h-2">
