@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="text-white font-bold text-lg tracking-tight">
-                        NoteApp
+                        OkageApp
                     </a>
                 </div>
 
