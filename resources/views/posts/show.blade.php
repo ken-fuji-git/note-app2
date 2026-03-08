@@ -24,10 +24,12 @@
                             <span class="badge-life">Life</span>
                         @elseif($post->category === 'idea')
                             <span class="badge-idea">Idea</span>
+                        @elseif($post->category === 'journey')
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">🐕 珍道中</span>
                         @endif
                         <span class="text-sm text-slate-400">{{ $post->created_at->format('Y年m月d日') }}</span>
                         <span class="text-slate-200">·</span>
-                        <span class="text-sm text-slate-400">{{ $post->user->name }}</span>
+                        <span class="text-sm text-slate-400">{{ $post->author_name ?? $post->user->name }}</span>
                     </div>
 
                     <!-- Title -->
@@ -40,7 +42,7 @@
 
                     <!-- Actions -->
                     @auth
-                        @if($post->user_id === auth()->id())
+                        @if($post->user_id === auth()->id() && $post->category !== 'journey')
                             <div class="flex gap-3 mt-10 pt-6 border-t border-slate-100">
                                 <a href="{{ route('posts.edit', $post) }}" class="btn-secondary">
                                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

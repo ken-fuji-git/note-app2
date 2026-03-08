@@ -58,8 +58,10 @@
                         <p class="text-xs text-amber-500 mt-1">{{ $journey->departed_at->format('Y年m月d日') }} 出立</p>
                     </div>
 
-                    <div class="flex gap-3 justify-center">
+                    <p id="save-status" class="text-xs text-slate-400 mb-4"></p>
+                    <div class="flex gap-3 justify-center flex-wrap">
                         <a href="{{ route('journey.departure') }}" class="btn-primary">もう一度出発させる</a>
+                        <a id="diary-link" href="{{ route('posts.index') }}" class="btn-secondary">珍道中日記を見る</a>
                         <a href="{{ route('journey.share', $journey) }}" class="btn-secondary">シェアする</a>
                     </div>
                 </div>
@@ -71,6 +73,8 @@
         const journeyId = {{ $journey->id }};
         const totalDays = {{ $journey->estimated_days }};
         const chaptersUrl = '{{ route("journey.generate-story", $journey) }}';
+        const savePostUrl = '{{ route("journey.save-post", $journey) }}';
+        const csrfToken = '{{ csrf_token() }}';
         const departureLat = {{ $journey->departure_lat }};
         const departureLng = {{ $journey->departure_lng }};
         const iseLat = 34.4551;
@@ -279,7 +283,30 @@
                 document.getElementById('arrival').classList.remove('hidden');
                 document.getElementById('arrival').scrollIntoView({ behavior: 'smooth' });
                 updateProgress(totalDays);
+                saveAsPost();
             }, 1000);
+        }
+
+        async function saveAsPost() {
+            const statusEl = document.getElementById('save-status');
+            try {
+                statusEl.textContent = '珍道中日記に保存中...';
+                const res = await fetch(savePostUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                });
+                if (!res.ok) throw new Error('保存に失敗しました');
+                const data = await res.json();
+                const postUrl = '{{ url("posts") }}/' + data.post_id;
+                document.getElementById('diary-link').href = postUrl;
+                statusEl.textContent = data.already_saved ? '✓ 珍道中日記に保存済み' : '✓ 珍道中日記に保存しました！';
+            } catch (e) {
+                statusEl.textContent = '日記の保存に失敗しました';
+            }
         }
 
         // スクロール監視でプリフェッチデータを表示

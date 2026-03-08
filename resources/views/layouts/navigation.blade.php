@@ -16,13 +16,13 @@
                         class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
                         Dashboard
                     </a>
-                    <a href="{{ route('posts.index') }}"
-                        class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('posts.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
-                        ノート
-                    </a>
                     <a href="{{ route('dogs.create') }}"
                         class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('dogs.*') || request()->routeIs('journey.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
-                        おかげ犬
+                        おかげ旅出発
+                    </a>
+                    <a href="{{ route('posts.index') }}"
+                        class="px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('posts.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800' }}">
+                        珍道中日記
                     </a>
                 </div>
             </div>
@@ -78,13 +78,13 @@
                 class="block px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700' }}">
                 Dashboard
             </a>
-            <a href="{{ route('posts.index') }}"
-                class="block px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('posts.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700' }}">
-                ノート
-            </a>
             <a href="{{ route('dogs.create') }}"
                 class="block px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('dogs.*') || request()->routeIs('journey.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700' }}">
-                おかげ犬
+                おかげ旅出発
+            </a>
+            <a href="{{ route('posts.index') }}"
+                class="block px-3 py-2 rounded-lg text-sm font-medium transition {{ request()->routeIs('posts.*') ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-700' }}">
+                珍道中日記
             </a>
         </div>
 

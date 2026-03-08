@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/journey/{journey}/story', [JourneyController::class, 'story'])->name('journey.story');
     Route::get('/journey/{journey}/chapters', [JourneyController::class, 'generateStory'])->name('journey.generate-story');
     Route::get('/journey/{journey}/share', [JourneyController::class, 'share'])->name('journey.share');
+    Route::post('/journey/{journey}/save-post', [JourneyController::class, 'saveAsPost'])->name('journey.save-post');
 });
 
 // ⬇️ ⚠️ /posts/create と衝突するため /posts/{post} は middleware グループの後に書く

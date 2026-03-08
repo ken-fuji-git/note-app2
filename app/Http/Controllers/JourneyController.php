@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dog;
 use App\Models\Journey;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -185,6 +186,68 @@ class JourneyController extends Controller
             'days' => $generated['days'],
             'is_last' => $isLastChunk,
         ]);
+    }
+
+    public function saveAsPost(Journey $journey)
+    {
+        abort_if($journey->dog->user_id !== auth()->id(), 403);
+
+        // 既に投稿済みならそのpostを返す
+        $existing = Post::where('journey_id', $journey->id)->first();
+        if ($existing) {
+            return response()->json(['post_id' => $existing->id, 'already_saved' => true]);
+        }
+
+        $dog = $journey->dog;
+        $story = $journey->story ?? ['days' => []];
+
+        if (empty($story['days'])) {
+            return response()->json(['error' => '物語がまだ生成されていません'], 400);
+        }
+
+        $eventLabels = [
+            'normal' => '🐾',
+            'hardship' => '😰',
+            'festival' => '🎉',
+            'companion_join' => '🤝',
+            'companion_leave' => '👋',
+            'rest' => '😴',
+            'arrival' => '⛩️',
+        ];
+
+        // 本文を整形
+        $bodyLines = [];
+        $bodyLines[] = "<p><strong>出発地:</strong> {$journey->departure_name}</p>";
+        $bodyLines[] = "<p><strong>お願い事:</strong> {$journey->wish}</p>";
+        $bodyLines[] = "<p><strong>距離:</strong> {$journey->distance_km}km / {$journey->estimated_days}日間</p>";
+        $bodyLines[] = "<hr>";
+
+        foreach ($story['days'] as $day) {
+            $icon = $eventLabels[$day['event_type']] ?? '🐾';
+            $weather = $day['weather'] ?? '';
+            $companion = !empty($day['companion']) ? "　仲間: {$day['companion']}" : '';
+            $text = $day['text'] ?? '';
+
+            $bodyLines[] = "<p><strong>{$icon}【{$day['day']}日目】{$day['location']}</strong><br>";
+            $bodyLines[] = "<small>天気: {$weather}{$companion}</small></p>";
+            $bodyLines[] = "<p>{$text}</p>";
+        }
+
+        $body = implode("\n", $bodyLines);
+        $title = "{$dog->name}の珍道中 — {$journey->departure_name}から伊勢神宮へ";
+        $authorName = "{$dog->name}（{$journey->dog->user->name}）";
+
+        $post = Post::create([
+            'title' => $title,
+            'author_name' => $authorName,
+            'body' => $body,
+            'category' => 'journey',
+            'user_id' => auth()->id(),
+            'journey_id' => $journey->id,
+            'is_published' => true,
+        ]);
+
+        return response()->json(['post_id' => $post->id, 'already_saved' => false]);
     }
 
     public function share(Journey $journey)
