@@ -125,29 +125,44 @@ class JourneyController extends Controller
         $geminiKey = config('services.gemini.key');
         \Log::info('Gemini request start', ['key_set' => !empty($geminiKey), 'start_day' => $startDay]);
 
-        try {
-            $response = Http::timeout(60)->withHeaders([
-                'Content-Type' => 'application/json',
-            ])->post(
-                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $geminiKey,
-                [
-                    'contents' => [
-                        ['parts' => [['text' => $prompt]]]
-                    ],
-                    'generationConfig' => [
-                        'responseMimeType' => 'application/json',
-                    ],
-                ]
-            );
-        } catch (\Exception $e) {
-            \Log::error('Gemini HTTP exception', ['message' => $e->getMessage()]);
-            return response()->json(['error' => '通信エラー'], 500);
+        $response = null;
+        $maxRetries = 3;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $response = Http::timeout(60)->withHeaders([
+                    'Content-Type' => 'application/json',
+                ])->post(
+                    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $geminiKey,
+                    [
+                        'contents' => [
+                            ['parts' => [['text' => $prompt]]]
+                        ],
+                        'generationConfig' => [
+                            'responseMimeType' => 'application/json',
+                        ],
+                    ]
+                );
+            } catch (\Exception $e) {
+                \Log::error('Gemini HTTP exception', ['message' => $e->getMessage(), 'attempt' => $attempt]);
+                if ($attempt === $maxRetries) {
+                    return response()->json(['error' => '通信エラー'], 500);
+                }
+                sleep(10);
+                continue;
+            }
+
+            if ($response->status() === 429 && $attempt < $maxRetries) {
+                \Log::info('Gemini rate limited, retrying', ['attempt' => $attempt]);
+                sleep(15);
+                continue;
+            }
+
+            break;
         }
 
-        \Log::info('Gemini response', ['status' => $response->status(), 'ok' => $response->ok()]);
-
         if (!$response->ok()) {
-            \Log::error('Gemini API error', ['body' => $response->body()]);
+            \Log::error('Gemini API error', ['status' => $response->status()]);
             return response()->json(['error' => '物語の生成に失敗しました'], 500);
         }
 
