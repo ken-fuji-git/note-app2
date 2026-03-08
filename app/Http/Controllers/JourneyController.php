@@ -169,7 +169,7 @@ class JourneyController extends Controller
             'origin' => "{$lat},{$lng}",
             'destination' => self::ISE_LAT . ',' . self::ISE_LNG,
             'language' => 'ja',
-            'key' => config('services.google_maps.key'),
+            'key' => config('services.google_maps.directions_key'),
         ]);
 
         $data = $response->json();
