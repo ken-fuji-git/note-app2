@@ -125,24 +125,42 @@ class JourneyController extends Controller
 
         $prompt = $this->buildStoryPrompt($dog, $journey, $startDay, $endDay, $season, $placesForChunk, $previousSummary, $isLastChunk);
 
-        $response = Http::timeout(60)->withHeaders([
-            'Content-Type' => 'application/json',
-        ])->post(
-            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . config('services.gemini.key'),
-            [
-                'contents' => [
-                    ['parts' => [['text' => $prompt]]]
-                ],
-                'generationConfig' => [
-                    'responseMimeType' => 'application/json',
-                ],
-            ]
-        );
+        $geminiKey = config('services.gemini.key');
+        \Log::info('Gemini request start', ['key_set' => !empty($geminiKey), 'start_day' => $startDay]);
+
+        try {
+            $response = Http::timeout(60)->withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $geminiKey,
+                [
+                    'contents' => [
+                        ['parts' => [['text' => $prompt]]]
+                    ],
+                    'generationConfig' => [
+                        'responseMimeType' => 'application/json',
+                    ],
+                ]
+            );
+        } catch (\Exception $e) {
+            \Log::error('Gemini HTTP exception', ['message' => $e->getMessage()]);
+            return response()->json(['error' => '通信エラー'], 500);
+        }
+
+        \Log::info('Gemini response', ['status' => $response->status(), 'ok' => $response->ok()]);
+
+        if (!$response->ok()) {
+            \Log::error('Gemini API error', ['body' => $response->body()]);
+            return response()->json(['error' => '物語の生成に失敗しました'], 500);
+        }
 
         $text = $response->json('candidates.0.content.parts.0.text');
         $generated = json_decode($text, true);
 
+        \Log::info('Gemini parsed', ['has_days' => isset($generated['days'])]);
+
         if (!$generated || !isset($generated['days'])) {
+            \Log::error('Gemini bad response', ['text' => $text]);
             return response()->json(['error' => '物語の生成に失敗しました'], 500);
         }
 
