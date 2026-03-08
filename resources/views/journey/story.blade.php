@@ -62,7 +62,7 @@
     <script>
         const journeyId = {{ $journey->id }};
         const totalDays = {{ $journey->estimated_days }};
-        const baseUrl = '{{ url("/") }}';
+        const chaptersUrl = '{{ route("journey.generate-story", $journey) }}';
         let currentDay = 1;
         let isGenerating = false;
 
@@ -89,7 +89,7 @@
             isGenerating = true;
 
             try {
-                const res = await fetch(`${baseUrl}/journey/${journeyId}/chapters?start_day=${startDay}`, {
+                const res = await fetch(`${chaptersUrl}?start_day=${startDay}`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                     },
@@ -119,7 +119,7 @@
             if (currentDay > totalDays) return;
 
             try {
-                const res = await fetch(`${baseUrl}/journey/${journeyId}/chapters?start_day=${currentDay}`, {
+                const res = await fetch(`${chaptersUrl}?start_day=${currentDay}`, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                     },
