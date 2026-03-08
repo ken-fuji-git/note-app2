@@ -133,7 +133,7 @@ class JourneyController extends Controller
                 $response = Http::timeout(60)->withHeaders([
                     'Content-Type' => 'application/json',
                 ])->post(
-                    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' . $geminiKey,
+                    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $geminiKey,
                     [
                         'contents' => [
                             ['parts' => [['text' => $prompt]]]
