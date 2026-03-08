@@ -12,6 +12,13 @@
 
     <div class="py-8">
         <div class="max-w-lg mx-auto px-4">
+            {{-- 地図 --}}
+            @if($journey->route_polyline)
+            <div class="card mb-4 overflow-hidden">
+                <div id="route-map" class="w-full h-48"></div>
+            </div>
+            @endif
+
             {{-- 旅の進行バー --}}
             <div class="mb-6">
                 <div class="flex justify-between text-xs text-slate-400 mb-1">
@@ -44,6 +51,8 @@
                     <div id="ofuda" class="mx-auto w-64 bg-amber-50 border-2 border-amber-300 rounded-lg p-6 mb-6"
                         style="background-image: linear-gradient(transparent 95%, rgba(139,69,19,0.1) 100%);">
                         <p class="text-xs text-amber-600 mb-2">御札</p>
+                        <img src="{{ asset('storage/' . $dog->photo_path) }}" alt="{{ $dog->name }}"
+                            class="w-16 h-16 rounded-full object-cover mx-auto mb-3 border-2 border-amber-200">
                         <p class="text-lg font-bold text-amber-900 mb-3" style="font-family: serif;">{{ $journey->wish }}</p>
                         <div class="w-px h-6 bg-amber-300 mx-auto mb-3"></div>
                         <p class="text-sm text-amber-700">{{ $dog->name }}</p>
@@ -63,8 +72,92 @@
         const journeyId = {{ $journey->id }};
         const totalDays = {{ $journey->estimated_days }};
         const chaptersUrl = '{{ route("journey.generate-story", $journey) }}';
+        const departureLat = {{ $journey->departure_lat }};
+        const departureLng = {{ $journey->departure_lng }};
+        const iseLat = 34.4551;
+        const iseLng = 136.7256;
+        const routePolyline = @json($journey->route_polyline);
         let currentDay = 1;
         let isGenerating = false;
+
+        // 地図関連
+        let routeMap, dogMarker, walkedPath, fullPath, routePoints;
+
+        function initRouteMap() {
+            if (!routePolyline || !document.getElementById('route-map')) return;
+
+            routePoints = google.maps.geometry.encoding.decodePath(routePolyline);
+
+            routeMap = new google.maps.Map(document.getElementById('route-map'), {
+                disableDefaultUI: true,
+                zoomControl: false,
+                mapTypeControl: false,
+                streetViewControl: false,
+                gestureHandling: 'none',
+            });
+
+            // ルート全体（薄い線）
+            fullPath = new google.maps.Polyline({
+                path: routePoints,
+                geodesic: true,
+                strokeColor: '#cbd5e1',
+                strokeOpacity: 0.8,
+                strokeWeight: 3,
+                map: routeMap,
+            });
+
+            // 歩いた部分（色付き線）
+            walkedPath = new google.maps.Polyline({
+                path: [routePoints[0]],
+                geodesic: true,
+                strokeColor: '#6366f1',
+                strokeOpacity: 1.0,
+                strokeWeight: 4,
+                map: routeMap,
+            });
+
+            // 犬マーカー
+            dogMarker = new google.maps.Marker({
+                position: routePoints[0],
+                map: routeMap,
+                label: { text: '🐕', fontSize: '20px' },
+                icon: {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 0,
+                },
+            });
+
+            // 出発地マーカー
+            new google.maps.Marker({
+                position: routePoints[0],
+                map: routeMap,
+                label: { text: '📍', fontSize: '16px' },
+                icon: { path: google.maps.SymbolPath.CIRCLE, scale: 0 },
+            });
+
+            // 伊勢神宮マーカー
+            new google.maps.Marker({
+                position: routePoints[routePoints.length - 1],
+                map: routeMap,
+                label: { text: '⛩️', fontSize: '16px' },
+                icon: { path: google.maps.SymbolPath.CIRCLE, scale: 0 },
+            });
+
+            // ルート全体が見えるようにフィット
+            const bounds = new google.maps.LatLngBounds();
+            routePoints.forEach(p => bounds.extend(p));
+            routeMap.fitBounds(bounds, { top: 20, bottom: 20, left: 20, right: 20 });
+        }
+
+        function updateMapProgress(day) {
+            if (!routePoints || !dogMarker) return;
+            const pct = Math.min(1, day / totalDays);
+            const idx = Math.min(Math.floor(pct * (routePoints.length - 1)), routePoints.length - 1);
+            const walkedPts = routePoints.slice(0, idx + 1);
+
+            walkedPath.setPath(walkedPts);
+            dogMarker.setPosition(routePoints[idx]);
+        }
 
         const eventIcons = {
             'normal': '🐾',
@@ -170,6 +263,7 @@
                     });
 
                     updateProgress(day.day);
+                    updateMapProgress(day.day);
                 }, i * 600);
             });
         }
@@ -182,6 +276,7 @@
 
         function showArrival() {
             setTimeout(() => {
+                updateMapProgress(totalDays);
                 document.getElementById('arrival').classList.remove('hidden');
                 document.getElementById('arrival').scrollIntoView({ behavior: 'smooth' });
                 updateProgress(totalDays);
@@ -214,5 +309,8 @@
 
         // 初期ロード
         loadStoryChunk(1);
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsKey }}&libraries=geometry&callback=initRouteMap">
     </script>
 </x-app-layout>

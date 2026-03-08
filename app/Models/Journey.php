@@ -17,6 +17,7 @@ class Journey extends Model
         'departed_at',
         'story',
         'route_places',
+        'route_polyline',
     ];
 
     protected function casts(): array

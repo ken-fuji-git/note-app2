@@ -59,6 +59,7 @@ class JourneyController extends Controller
             'estimated_days' => $estimatedDays,
             'departed_at' => now()->toDateString(),
             'route_places' => $places,
+            'route_polyline' => $directions['polyline'],
             'story' => ['days' => []],
         ]);
 
@@ -82,6 +83,7 @@ class JourneyController extends Controller
         return view('journey.story', [
             'journey' => $journey,
             'dog' => $journey->dog,
+            'googleMapsKey' => config('services.google_maps.key'),
         ]);
     }
 
@@ -237,6 +239,7 @@ class JourneyController extends Controller
             'distance_km' => $distanceKm,
             'start_address' => $leg['start_address'],
             'places' => $places,
+            'polyline' => $route['overview_polyline']['points'] ?? null,
         ];
     }
 
