@@ -62,7 +62,6 @@
     <script>
         const journeyId = {{ $journey->id }};
         const totalDays = {{ $journey->estimated_days }};
-        const csrfToken = '{{ csrf_token() }}';
         let currentDay = 1;
         let isGenerating = false;
 
@@ -89,13 +88,10 @@
             isGenerating = true;
 
             try {
-                const res = await fetch(`/journey/${journeyId}/generate-story`, {
-                    method: 'POST',
+                const res = await fetch(`/journey/${journeyId}/generate-story?start_day=${startDay}`, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
-                    body: JSON.stringify({ start_day: startDay }),
                 });
 
                 if (!res.ok) throw new Error('生成に失敗しました');
@@ -122,13 +118,10 @@
             if (currentDay > totalDays) return;
 
             try {
-                const res = await fetch(`/journey/${journeyId}/generate-story`, {
-                    method: 'POST',
+                const res = await fetch(`/journey/${journeyId}/generate-story?start_day=${currentDay}`, {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
                     },
-                    body: JSON.stringify({ start_day: currentDay }),
                 });
 
                 if (res.ok) {

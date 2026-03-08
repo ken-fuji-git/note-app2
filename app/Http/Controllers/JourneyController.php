@@ -89,11 +89,8 @@ class JourneyController extends Controller
     {
         abort_if($journey->dog->user_id !== auth()->id(), 403);
 
-        $request->validate([
-            'start_day' => 'required|integer|min:1',
-        ]);
-
-        $startDay = $request->input('start_day');
+        $startDay = (int) $request->query('start_day', 1);
+        if ($startDay < 1) $startDay = 1;
         $endDay = min($startDay + 4, $journey->estimated_days);
         $dog = $journey->dog;
 
