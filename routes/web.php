@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/journey/start', [JourneyController::class, 'start'])->name('journey.start');
     Route::get('/journey/{journey}', [JourneyController::class, 'show'])->name('journey.show');
     Route::get('/journey/{journey}/story', [JourneyController::class, 'story'])->name('journey.story');
-    Route::get('/journey/{journey}/generate-story', [JourneyController::class, 'generateStory'])->name('journey.generate-story');
+    Route::get('/journey/{journey}/chapters', [JourneyController::class, 'generateStory'])->name('journey.generate-story');
     Route::get('/journey/{journey}/share', [JourneyController::class, 'share'])->name('journey.share');
 });
 
