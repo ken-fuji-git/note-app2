@@ -10,19 +10,20 @@
         </div>
     </x-slot>
 
-    <div class="py-8">
+    {{-- 固定ヘッダー：地図+進行バー --}}
+    <div id="sticky-header" class="sticky top-0 z-30 bg-slate-50 shadow-sm">
         <div class="max-w-lg mx-auto px-4">
             {{-- 地図 --}}
             @if($journey->route_polyline)
-            <div class="card mb-4 overflow-hidden">
-                <div id="route-map" class="w-full h-48"></div>
+            <div class="overflow-hidden rounded-b-xl">
+                <div id="route-map" class="w-full h-36"></div>
             </div>
             @endif
 
             {{-- 旅の進行バー --}}
-            <div class="mb-6">
+            <div class="py-2">
                 <div class="flex justify-between text-xs text-slate-400 mb-1">
-                    <span>{{ $journey->departure_name }}</span>
+                    <span class="truncate max-w-[45%]">{{ $journey->departure_name }}</span>
                     <span>伊勢神宮</span>
                 </div>
                 <div class="w-full bg-slate-200 rounded-full h-2">
@@ -30,7 +31,12 @@
                 </div>
                 <p id="progress-text" class="text-xs text-slate-400 mt-1 text-center"></p>
             </div>
+        </div>
+    </div>
 
+    {{-- スクロールエリア：ストーリー --}}
+    <div class="py-4">
+        <div class="max-w-lg mx-auto px-4">
             {{-- 物語コンテナ --}}
             <div id="story-container"></div>
 
